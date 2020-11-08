@@ -61,7 +61,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _faces = List.generate(16, (index) => index.toString());
-    _detector = ShakeDetector.autoStart(onPhoneShake: _boggle);
+    _detector = ShakeDetector.autoStart(
+        onPhoneShake: () {
+          _boggle();
+        },
+        shakeThresholdGravity: 5.0);
   }
 
   @override
