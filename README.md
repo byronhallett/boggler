@@ -1,3 +1,3 @@
 # boggler
 
-Just roll boggle dice, modern english dice distribution.
+Boggle dice roller (using official distribution) and simple word checker (collins).
