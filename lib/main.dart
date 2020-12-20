@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:shake/shake.dart';
 
 void main() {
   runApp(MyApp());
@@ -61,10 +60,10 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> _faces;
   List<int> _selections = List.empty(growable: true);
   List<bool> _enabledIndices;
-  // ShakeDetector _detector;
   PlatformAssetBundle _bundle;
   List<String> _dict;
   Result _lastResult = Result.none;
+  List<String> _foundWords = List.empty(growable: true);
 
   @override
   void initState() {
@@ -73,17 +72,10 @@ class _MyHomePageState extends State<MyHomePage> {
     _faces =
         List.generate(pow(widget.gridSize, 2), (index) => index.toString());
     _enabledIndices = List.filled(pow(widget.gridSize, 2), true);
-
-    // _detector = ShakeDetector.autoStart(
-    //     onPhoneShake: () {
-    //       _boggle();
-    //     },
-    //     shakeThresholdGravity: 5.0);
   }
 
   @override
   void dispose() {
-    // _detector.stopListening();
     super.dispose();
   }
 
@@ -99,6 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _selections.clear();
       _setAllowedButtons();
       _lastResult = Result.none;
+      _foundWords.clear();
     });
   }
 
@@ -111,8 +104,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _submit() {
-    print(_currentWord());
-    bool found = _dict.contains(_currentWord());
+    String current = _currentWord();
+    bool found = _dict.contains(current);
+    // if not in found, add
+    if (found && !_foundWords.contains(current)) _foundWords.add(current);
     setState(() {
       _lastResult = found ? Result.pass : Result.fail;
       _selections.clear();
@@ -158,7 +153,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void _loadDictionary(BuildContext context) async {
     if (_bundle != null) return;
     _bundle = DefaultAssetBundle.of(context);
-    String dictString = await _bundle.loadString('collins.txt', cache: true);
+    String dictString =
+        await _bundle.loadString('assets/collins.txt', cache: true);
     _dict = dictString.split("\n");
     _dict = _dict.map((e) => e.trim()).toList();
   }
@@ -240,14 +236,11 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    _currentWord(),
-                    style: TextStyle(fontSize: widget.fontSize),
-                  ),
-                ),
+              Text(
+                _selections.isEmpty
+                    ? "score: " + _foundWords.length.toString()
+                    : _currentWord(),
+                style: TextStyle(fontSize: widget.fontSize),
               ),
               if (_selections.isNotEmpty)
                 FloatingActionButton(
