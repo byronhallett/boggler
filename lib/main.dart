@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _faces =
         List.generate(pow(widget.gridSize, 2), (index) => index.toString());
     _enabledIndices = List.filled(pow(widget.gridSize, 2), true);
-    _boggle();
+    _multiBoggle();
   }
 
   @override
@@ -78,6 +78,20 @@ class _MyHomePageState extends State<MyHomePage> {
     return cubes.map((e) => e[widget.rand.nextInt(6)]).toList();
   }
 
+  void _multiBoggle() {
+    // disable interaction
+    var elapsed = 0;
+    int period = 200;
+    int total = 1000;
+    Timer.periodic(Duration(milliseconds: period), (timer) {
+      if (elapsed >= total) {
+        return;
+      }
+      _boggle();
+      elapsed += period;
+    });
+  }
+
   void _boggle() {
     setState(() {
       _faces = randomFaces();
@@ -90,6 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _letterTapped(int selection) {
+    // if (_lockInteraction) return;
     // undo logic
     int oldIndex = _selections.indexOf(selection);
     bool undo = oldIndex >= 0;
@@ -191,7 +206,7 @@ class _MyHomePageState extends State<MyHomePage> {
         score: _currentScore,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _boggle,
+        onPressed: _multiBoggle,
         tooltip: 'Boggle',
         child: Icon(Icons.shuffle),
       ),
