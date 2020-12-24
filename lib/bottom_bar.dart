@@ -6,18 +6,31 @@ class BottomBar extends StatelessWidget {
       {Key key,
       this.result,
       this.currentWord,
-      this.score,
       this.fontSize,
-      this.submit})
+      this.submit,
+      this.lastScore})
       : super(key: key);
 
   final Result result;
+  final int lastScore;
   final String currentWord;
-  final int score;
   final double fontSize;
   final VoidCallback submit;
   final double footerSize = 80;
   final double edgePadding = 20;
+
+  String get _explaination {
+    switch (result) {
+      case Result.fail:
+        return "Word not found";
+      case Result.duplicate:
+        return "Word already submitted";
+      case Result.pass:
+        return "Scored " + lastScore.toString() + " points";
+      default:
+        return "Tap letters above";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +49,7 @@ class BottomBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              currentWord.isEmpty ? "score: " + score.toString() : currentWord,
+              currentWord.isNotEmpty ? currentWord : _explaination,
               style: TextStyle(fontSize: fontSize),
             ),
             if (currentWord.isNotEmpty)

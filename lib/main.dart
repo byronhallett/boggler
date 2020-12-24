@@ -47,11 +47,15 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> _dict;
   Result _lastResult = Result.none;
   List<String> _foundWords = List.empty(growable: true);
+  int _lastScore = 0;
 
   @override
   void initState() {
     super.initState();
-
+    // lock orientation
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     _faces =
         List.generate(pow(widget.gridSize, 2), (index) => index.toString());
     _enabledIndices = List.filled(pow(widget.gridSize, 2), true);
@@ -61,6 +65,12 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     super.dispose();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   List<String> randomFaces() {
@@ -93,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // if not in found, add
     if (found && !duplicate) _foundWords.add(current);
     setState(() {
+      _lastScore = scoreArray[current.length];
       _lastResult = found
           ? duplicate
               ? Result.duplicate
@@ -170,6 +181,7 @@ class _MyHomePageState extends State<MyHomePage> {
         gridSize: widget.gridSize,
         letterTapped: _letterTapped,
         selections: _selections,
+        score: _currentScore,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _boggle,
@@ -181,8 +193,8 @@ class _MyHomePageState extends State<MyHomePage> {
         currentWord: _currentWord,
         fontSize: widget.fontSize,
         result: _lastResult,
-        score: _currentScore,
         submit: _submit,
+        lastScore: _lastScore,
       ),
     );
   }
