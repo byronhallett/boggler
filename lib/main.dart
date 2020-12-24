@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:boggler/constants.dart';
@@ -82,16 +83,21 @@ class _MyHomePageState extends State<MyHomePage> {
       _faces = randomFaces();
       _faces.shuffle(widget.rand);
       _selections.clear();
-      _setAllowedButtons();
       _lastResult = Result.none;
       _foundWords.clear();
+      _setAllowedButtons();
     });
   }
 
   void _letterTapped(int selection) {
+    // undo logic
+    int oldIndex = _selections.indexOf(selection);
+    bool undo = oldIndex >= 0;
+    if (undo) _selections.removeRange(oldIndex, _selections.length);
+    // select logic
     setState(() {
       _lastResult = Result.none;
-      _selections.add(selection);
+      if (!undo) _selections.add(selection);
       _setAllowedButtons();
     });
   }
@@ -121,6 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       // set all false
       _enabledIndices.fillRange(0, _enabledIndices.length, false);
+
       // set true all neighbour of last
       int last = _selections.last;
       int up = last - widget.gridSize;
@@ -138,11 +145,11 @@ class _MyHomePageState extends State<MyHomePage> {
         if (element >= 0 && element < _enabledIndices.length)
           _enabledIndices[element] = true;
       });
-      // set false those in the list
-      _selections.forEach((element) {
-        _enabledIndices[element] = false;
-      });
     }
+    // set all selections true
+    _selections.forEach((element) {
+      _enabledIndices[element] = true;
+    });
   }
 
   void _loadDictionary(BuildContext context) async {
