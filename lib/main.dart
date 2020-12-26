@@ -49,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Result _lastResult = Result.none;
   List<String> _foundWords = List.empty(growable: true);
   int _lastScore = 0;
+  bool _lockInteraction = false;
 
   @override
   void initState() {
@@ -60,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _faces =
         List.generate(pow(widget.gridSize, 2), (index) => index.toString());
     _enabledIndices = List.filled(pow(widget.gridSize, 2), true);
-    _multiBoggle();
+    _boggle();
   }
 
   @override
@@ -80,11 +81,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _multiBoggle() {
     // disable interaction
-    var elapsed = 0;
-    int period = 200;
-    int total = 1000;
+    setState(() {
+      _lockInteraction = true;
+    });
+    int elapsed = 0;
+    int period = 100;
+    int total = 1500;
     Timer.periodic(Duration(milliseconds: period), (timer) {
       if (elapsed >= total) {
+        // break the timer loop
+        timer.cancel();
+        setState(() {
+          _lockInteraction = false;
+        });
         return;
       }
       _boggle();
@@ -104,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _letterTapped(int selection) {
-    // if (_lockInteraction) return;
+    if (_lockInteraction) return;
     // undo logic
     int oldIndex = _selections.indexOf(selection);
     bool undo = oldIndex >= 0;
@@ -192,6 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     _loadDictionary(context);
+    print(_lockInteraction);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -201,12 +211,12 @@ class _MyHomePageState extends State<MyHomePage> {
         faces: _faces,
         fontSize: widget.fontSize,
         gridSize: widget.gridSize,
-        letterTapped: _letterTapped,
+        letterTapped: _lockInteraction ? null : _letterTapped,
         selections: _selections,
         score: _currentScore,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _multiBoggle,
+        onPressed: _lockInteraction ? null : _multiBoggle,
         tooltip: 'Boggle',
         child: Icon(Icons.shuffle),
       ),
