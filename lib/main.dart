@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:boggler/constants.dart';
+import 'package:boggler/word_drawer.dart';
 import 'package:boggler/grid.dart';
 import 'package:boggler/bottom_bar.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-enum Result { none, fail, pass, duplicate }
+enum Result { none, fail, pass, duplicate, short }
 
 class _MyHomePageState extends State<MyHomePage> {
   List<String> _faces;
@@ -77,6 +78,38 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<String> randomFaces() {
     return cubes.map((e) => e[widget.rand.nextInt(6)]).toList();
+  }
+
+  void _shuffleTapped() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              title: Text(
+                "Start a new game?",
+                style: TextStyle(fontSize: 24),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    "No...",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _multiBoggle();
+                  },
+                  child: Text(
+                    "Yes!",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+              ],
+            ));
   }
 
   void _multiBoggle() {
@@ -128,16 +161,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _submit() {
     String current = _currentWord;
+    bool short = current.length < 3;
     bool found = _dict.contains(current);
     bool duplicate = _foundWords.contains(current);
     // if not in found, add
-    if (found && !duplicate) _foundWords.add(current);
+    if (found && !duplicate && !short) {
+      _foundWords.add(current);
+      _foundWords.sort();
+    }
     setState(() {
       _lastScore = scoreArray[current.length];
       _lastResult = found
           ? duplicate
               ? Result.duplicate
-              : Result.pass
+              : short
+                  ? Result.short
+                  : Result.pass
           : Result.fail;
       _selections.clear();
       _setAllowedButtons();
@@ -206,6 +245,10 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
+      endDrawer: WordDrawer(
+        foundWords: _foundWords,
+        fontSize: widget.fontSize,
+      ),
       body: Grid(
         enabledIndices: _enabledIndices,
         faces: _faces,
@@ -216,7 +259,7 @@ class _MyHomePageState extends State<MyHomePage> {
         score: _currentScore,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _lockInteraction ? null : _multiBoggle,
+        onPressed: _lockInteraction ? null : _shuffleTapped,
         tooltip: 'Boggle',
         child: Icon(Icons.shuffle),
       ),

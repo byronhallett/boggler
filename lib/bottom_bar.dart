@@ -25,8 +25,12 @@ class BottomBar extends StatelessWidget {
         return "Word not found";
       case Result.duplicate:
         return "Word already submitted";
+      case Result.short:
+        return "Must have min 3 letters";
       case Result.pass:
-        return "Scored " + lastScore.toString() + " points";
+        return "Scored " +
+            lastScore.toString() +
+            (lastScore > 1 ? " points" : " point");
       default:
         return "Tap letters above";
     }

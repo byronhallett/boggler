@@ -17,4 +17,4 @@ const List<List<String>> cubes = [
   ["H", "L", "N", "N", "R", "Z"],
 ];
 
-const List<int> scoreArray = [0, 1, 1, 1, 1, 2, 3, 5, 11];
+const List<int> scoreArray = [0, 0, 0, 1, 1, 2, 3, 5, 11];
